@@ -7,15 +7,56 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">ورود</button>
+                <button class="tab-btn" onclick="switchTab('register')">ثبت‌نام</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="tab-content active">
+                <h2>ورود به حساب</h2>
+                <input type="email" placeholder="ایمیل" required>
+                <input type="password" placeholder="رمز عبور" required>
+                <button type="submit" class="btn-primary">ورود</button>
+            </form>
+            
+            <!-- Register Form -->
+            <form id="registerForm" class="tab-content">
+                <h2>ساخت حساب جدید</h2>
+                <input type="text" placeholder="نام کامل" required>
+                <input type="email" placeholder="ایمیل" required>
+                <input type="tel" placeholder="شماره موبایل" required>
+                <input type="password" placeholder="رمز عبور" required>
+                <input type="password" placeholder="تکرار رمز عبور" required>
+                <button type="submit" class="btn-primary">ثبت‌نام</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="logo">🤖 AI Shop</div>
             <nav class="nav">
-                <a href="#products">محصولات</a>
-                <a href="#contact">تماس</a>
-                <a href="#cart" class="cart-link">🛒 سبد (<span id="cart-count">0</span>)</a>
+                <a href="#products" onclick="goToSection('products')">محصولات</a>
+                <a href="#" onclick="toggleUserMenu()" class="user-menu-btn" id="userMenuBtn">👤 کاربر</a>
+                <a href="#cart" onclick="goToSection('cart')" class="cart-link">🛒 سبد (<span id="cart-count">0</span>)</a>
             </nav>
+            
+            <!-- User Dropdown Menu -->
+            <div id="userDropdown" class="user-dropdown hidden">
+                <a href="#" onclick="goToDashboard()">📊 داشبورد</a>
+                <a href="#" onclick="goToInvoices()">📄 صورت‌حساب‌ها</a>
+                <a href="#" onclick="goToGiftCards()">🎁 کد‌های هدیه</a>
+                <a href="#" onclick="goToProfile()">⚙️ تنظیمات حساب</a>
+                <a href="#" onclick="goToAdmin()">🔑 پنل ادمین</a>
+                <hr>
+                <a href="#" onclick="logout()" class="logout-btn">خروج</a>
+            </div>
         </div>
     </header>
 
@@ -23,46 +64,247 @@
     <section class="hero">
         <div class="hero-content">
             <h1>اکانت‌های حرفه‌ای هوش مصنوعی</h1>
-            <p>دسترسی فوری به بهترین ابزارهای AI</p>
-            <button class="btn-primary" onclick="scrollToProducts()">خرید کنید</button>
+            <p>دسترسی فوری به بهترین ابزارهای AI با درگاه‌های امن</p>
+            <button class="btn-primary" id="heroBtn" onclick="showAuthModal()">شروع کنید</button>
         </div>
     </section>
 
-    <!-- Products Section -->
-    <section id="products" class="products">
-        <div class="container">
-            <h2>محصولات ما</h2>
-            <div class="products-grid" id="products-grid"></div>
-        </div>
-    </section>
+    <!-- Main Content -->
+    <div id="mainContent">
+        <!-- Products Section -->
+        <section id="products" class="products hidden">
+            <div class="container">
+                <h2>محصولات</h2>
+                <div class="products-grid" id="products-grid"></div>
+            </div>
+        </section>
 
-    <!-- Cart Section -->
-    <section id="cart" class="cart-section">
-        <div class="container">
-            <h2>سبد خرید</h2>
-            <div class="cart-container">
-                <div id="cart-items" class="cart-items"></div>
-                <div class="cart-summary">
-                    <div class="summary-row">
-                        <span>جمع:</span>
-                        <span id="total-price">0</span> تومان
+        <!-- Cart Section -->
+        <section id="cart" class="cart-section hidden">
+            <div class="container">
+                <h2>سبد خرید</h2>
+                <div class="cart-container">
+                    <div id="cart-items" class="cart-items"></div>
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>جمع:</span>
+                            <span id="total-price">0</span> تومان
+                        </div>
+                        <div class="form-group">
+                            <label>کد تخفیف:</label>
+                            <input type="text" id="coupon-code" placeholder="کد تخفیف را وارد کنید">
+                            <button onclick="applyCoupon()" class="btn-small">اعمال</button>
+                        </div>
+                        <div id="discount-info" class="discount-info hidden"></div>
+                        <div class="summary-row final">
+                            <span>مبلغ نهایی:</span>
+                            <span id="final-price">0</span> تومان
+                        </div>
+                        <button class="btn-checkout" onclick="goToPayment()">رفتن به پرداخت</button>
                     </div>
-                    <button class="btn-checkout" onclick="checkout()">پرداخت از طریق Payment One</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Gateway Section -->
+        <section id="payment" class="payment-section hidden">
+            <div class="container">
+                <h2>انتخاب درگاه پرداخت</h2>
+                <div class="gateway-options">
+                    <div class="gateway-card" onclick="selectGateway('paymentone')">
+                        <div class="gateway-icon">💳</div>
+                        <h3>Payment One</h3>
+                        <p>درگاه مطمئن و سریع</p>
+                        <span class="radio">⭕</span>
+                    </div>
+                    <div class="gateway-card" onclick="selectGateway('zarinpal')">
+                        <div class="gateway-icon">🟢</div>
+                        <h3>زرین‌پال</h3>
+                        <p>درگاه معتبر ایران</p>
+                        <span class="radio">⭕</span>
+                    </div>
+                    <div class="gateway-card" onclick="selectGateway('idpay')">
+                        <div class="gateway-icon">🔵</div>
+                        <h3>آی‌دی‌پی</h3>
+                        <p>درگاه ملی پرداخت</p>
+                        <span class="radio">⭕</span>
+                    </div>
+                    <div class="gateway-card" onclick="selectGateway('test')">
+                        <div class="gateway-icon">🧪</div>
+                        <h3>درگاه تستی</h3>
+                        <p>برای تست و شبیه‌سازی</p>
+                        <span class="radio">⭕</span>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="proceedToPayment()">ادامه</button>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="dashboard-section hidden">
+            <div class="container">
+                <h2>داشبورد کاربر</h2>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>📊 خلاصه</h3>
+                        <div class="stat"><span>کل خریدها:</span> <strong id="totalPurchases">0</strong></div>
+                        <div class="stat"><span>کل هزینه:</span> <strong id="totalSpent">0</strong> تومان</div>
+                        <div class="stat"><span>اکانت‌های فعال:</span> <strong id="activeAccounts">0</strong></div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>🎁 کد‌های هدیه</h3>
+                        <div id="giftCodes" class="gift-codes-list"></div>
+                        <button onclick="goToGiftCards()" class="btn-small">مدیریت کد‌ها</button>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>📄 آخرین سفارش‌ها</h3>
+                        <div id="recentOrders" class="recent-orders-list"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="profile-section hidden">
+            <div class="container">
+                <h2>تنظیمات حساب</h2>
+                <form id="profileForm" class="form-container">
+                    <div class="form-group">
+                        <label>نام کامل</label>
+                        <input type="text" id="fullName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>ایمیل</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>شماره موبایل</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label>رمز عبور جدید (اختیاری)</label>
+                        <input type="password" id="newPassword" placeholder="خالی بگذارید اگر نمی‌خواهید تغییر دهید">
+                    </div>
+                    <button type="submit" class="btn-primary">ذخیره تغییرات</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Invoices Section -->
+        <section id="invoices" class="invoices-section hidden">
+            <div class="container">
+                <h2>صورت‌حساب‌ها</h2>
+                <div class="invoices-table" id="invoicesTable"></div>
+            </div>
+        </section>
+
+        <!-- Admin Panel -->
+        <section id="admin" class="admin-section hidden">
+            <div class="container">
+                <h2>🔑 پنل مدیریت</h2>
+                <div class="admin-tabs">
+                    <button class="admin-tab-btn active" onclick="switchAdminTab('dashboard')">داشبورد</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('coupons')">کوپن‌ها</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('users')">کاربران</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('orders')">سفارش‌ها</button>
+                </div>
+
+                <!-- Admin Dashboard -->
+                <div id="admin-dashboard" class="admin-tab-content active">
+                    <div class="admin-stats">
+                        <div class="stat-card">
+                            <h3>کل درآمد</h3>
+                            <p id="totalRevenue">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>کل سفارش</h3>
+                            <p id="totalOrders">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>کل کاربر</h3>
+                            <p id="totalUsers">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>فروش امروز</h3>
+                            <p id="todaySales">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coupons Management -->
+                <div id="admin-coupons" class="admin-tab-content">
+                    <div class="coupon-form">
+                        <h3>ایجاد کوپن جدید</h3>
+                        <div class="form-group">
+                            <label>کد کوپن</label>
+                            <input type="text" id="couponCode" placeholder="مثال: SAVE20">
+                        </div>
+                        <div class="form-group">
+                            <label>درصد تخفیف</label>
+                            <input type="number" id="discountPercent" min="1" max="100" placeholder="20">
+                        </div>
+                        <div class="form-group">
+                            <label>تعداد استفاده (0 = نامحدود)</label>
+                            <input type="number" id="usageLimit" min="0">
+                        </div>
+                        <button onclick="createCoupon()" class="btn-primary">ایجاد کوپن</button>
+                    </div>
+                    <div id="couponsTable" class="coupons-list"></div>
+                </div>
+
+                <!-- Users Management -->
+                <div id="admin-users" class="admin-tab-content">
+                    <div id="usersList" class="users-list"></div>
+                </div>
+
+                <!-- Orders Management -->
+                <div id="admin-orders" class="admin-tab-content">
+                    <div id="ordersList" class="orders-list"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Test Payment Modal -->
+    <div id="testPaymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTestPayment()">&times;</span>
+            <h2>درگاه پرداخت تستی</h2>
+            <div class="test-payment-container">
+                <div class="payment-info">
+                    <h3>اطلاعات سفارش</h3>
+                    <div class="info-row">
+                        <span>شماره سفارش:</span>
+                        <strong id="testOrderId"></strong>
+                    </div>
+                    <div class="info-row">
+                        <span>مبلغ:</span>
+                        <strong id="testAmount"></strong> تومان
+                    </div>
+                </div>
+                <div class="test-card-options">
+                    <h3>انتخاب وضعیت پرداخت:</h3>
+                    <button onclick="completeTestPayment(true)" class="btn-success">✅ پرداخت موفق</button>
+                    <button onclick="completeTestPayment(false)" class="btn-danger">❌ پرداخت ناموفق</button>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <p>&copy; 2024 AI Shop | تمام حقوق محفوظ است</p>
-            <p id="contact">📧 تماس: support@aishop.ir | 💬 پشتیبانی 24/7</p>
+            <p>📧 تماس: support@aishop.ir | 💬 پشتیبانی 24/7</p>
         </div>
     </footer>
 
+    <script src="auth.js"></script>
     <script src="products.js"></script>
     <script src="cart.js"></script>
-    <script src="payment.js"></script>
+    <script src="payment-gateway.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="admin.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
