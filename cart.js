@@ -1,7 +1,15 @@
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let appliedCoupon = null;
+let discountAmount = 0;
 
 function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
+    if (!currentUser) {
+        showNotification('لطفاً ابتدا وارد حساب خود شوید', 'info');
+        showAuthModal();
+        return;
+    }
+    
+    const product = getProductById(productId);
     const existingItem = cart.find(item => item.id === productId);
     
     if (existingItem) {
@@ -15,13 +23,14 @@ function addToCart(productId) {
     
     saveCart();
     updateCartUI();
-    alert(`${product.name} به سبد اضافه شد!`);
+    showNotification(product.name + ' به سبد اضافه شد', 'success');
 }
 
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     saveCart();
     updateCartUI();
+    showNotification('محصول از سبد حذف شد', 'info');
 }
 
 function saveCart() {
@@ -32,14 +41,16 @@ function updateCartUI() {
     const cartCount = document.getElementById('cart-count');
     const cartItems = document.getElementById('cart-items');
     const totalPrice = document.getElementById('total-price');
+    const finalPrice = document.getElementById('final-price');
     
-    // Update count
-    cartCount.textContent = cart.length;
+    if (cartCount) cartCount.textContent = cart.length;
     
-    // Update items
+    if (!cartItems) return;
+    
     if (cart.length === 0) {
         cartItems.innerHTML = '<div class="empty-cart">سبد خرید شما خالی است</div>';
-        totalPrice.textContent = '0';
+        if (totalPrice) totalPrice.textContent = '0';
+        if (finalPrice) finalPrice.textContent = '0';
         return;
     }
     
@@ -53,10 +64,41 @@ function updateCartUI() {
         </div>
     `).join('');
     
-    // Update total
     const total = cart.reduce((sum, item) => sum + item.price, 0);
-    totalPrice.textContent = total.toLocaleString('fa-IR');
+    if (totalPrice) totalPrice.textContent = total.toLocaleString('fa-IR');
+    
+    const final = total - discountAmount;
+    if (finalPrice) finalPrice.textContent = final.toLocaleString('fa-IR');
 }
 
-// Initialize UI
+function applyCoupon() {
+    const couponCode = document.getElementById('coupon-code').value;
+    const coupons = JSON.parse(localStorage.getItem('coupons')) || [];
+    const coupon = coupons.find(c => c.code === couponCode && (c.usageLimit === 0 || c.used < c.usageLimit));
+    
+    if (!coupon) {
+        showNotification('کد تخفیف نامعتبر است', 'error');
+        return;
+    }
+    
+    appliedCoupon = coupon;
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    discountAmount = Math.floor(total * (coupon.discount / 100));
+    
+    const discountInfo = document.getElementById('discount-info');
+    discountInfo.textContent = `کوپن ${coupon.code}: تخفیف ${coupon.discount}% (${discountAmount.toLocaleString('fa-IR')} تومان)`;
+    discountInfo.classList.remove('hidden');
+    
+    updateCartUI();
+    showNotification('کد تخفیف با موفقیت اعمال شد', 'success');
+}
+
+function clearCart() {
+    cart = [];
+    appliedCoupon = null;
+    discountAmount = 0;
+    saveCart();
+    updateCartUI();
+}
+
 updateCartUI();
