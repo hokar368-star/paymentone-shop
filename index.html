@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فروشگاه اکانت‌های هوش مصنوعی | Payment One</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">🤖 AI Shop</div>
+            <nav class="nav">
+                <a href="#products">محصولات</a>
+                <a href="#contact">تماس</a>
+                <a href="#cart" class="cart-link">🛒 سبد (<span id="cart-count">0</span>)</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>اکانت‌های حرفه‌ای هوش مصنوعی</h1>
+            <p>دسترسی فوری به بهترین ابزارهای AI</p>
+            <button class="btn-primary" onclick="scrollToProducts()">خرید کنید</button>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section id="products" class="products">
+        <div class="container">
+            <h2>محصولات ما</h2>
+            <div class="products-grid" id="products-grid"></div>
+        </div>
+    </section>
+
+    <!-- Cart Section -->
+    <section id="cart" class="cart-section">
+        <div class="container">
+            <h2>سبد خرید</h2>
+            <div class="cart-container">
+                <div id="cart-items" class="cart-items"></div>
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>جمع:</span>
+                        <span id="total-price">0</span> تومان
+                    </div>
+                    <button class="btn-checkout" onclick="checkout()">پرداخت از طریق Payment One</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 AI Shop | تمام حقوق محفوظ است</p>
+            <p id="contact">📧 تماس: support@aishop.ir | 💬 پشتیبانی 24/7</p>
+        </div>
+    </footer>
+
+    <script src="products.js"></script>
+    <script src="cart.js"></script>
+    <script src="payment.js"></script>
+</body>
+</html>
